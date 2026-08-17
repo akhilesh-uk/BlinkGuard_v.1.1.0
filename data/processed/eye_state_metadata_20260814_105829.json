@@ -1,0 +1,18 @@
+{
+    "session_timestamp": "20260814_105829",
+    "condition": "spectacles",
+    "processing_mode": "high_power",
+    "target_fps": 15,
+    "calibration_duration_seconds": 10.0,
+    "baseline_ear": 0.37138365320704353,
+    "calibration_mean": 0.3650322552635522,
+    "calibration_min": 0.10873332726269458,
+    "calibration_max": 0.4098534386386255,
+    "calibration_std": 0.033123778137033454,
+    "closed_ratio": 0.65,
+    "closed_threshold": 0.2413993745845783,
+    "smoothing_alpha": 0.35,
+    "min_closed_duration": 0.05,
+    "max_blink_duration": 0.8,
+    "manual_blinks": 5
+}
