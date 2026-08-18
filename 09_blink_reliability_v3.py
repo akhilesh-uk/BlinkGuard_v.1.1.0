@@ -321,19 +321,19 @@ condition = input("Condition: ").strip() or "unspecified"
 
 print()
 print("Select processing mode:")
-print("  1 = low_power   (~5 FPS)")
-print("  2 = balanced     (~10 FPS)")
-print("  3 = high_power   (~15 FPS)")
+print("  1 = low_power   (10 FPS)")
+print("  2 = balanced     (20 FPS)")
+print("  3 = high_power   (30 FPS)")
 print()
 mode_choice = input("Mode [1/2/3]: ").strip()
 
 mode_map = {
-    "1": ("low_power", 5),
-    "2": ("balanced", 10),
-    "3": ("high_power", 15),
+    "1": ("low_power", 10),
+    "2": ("balanced", 20),
+    "3": ("high_power", 30),
 }
 
-processing_mode, target_fps = mode_map.get(mode_choice, ("balanced", 10))
+processing_mode, target_fps = mode_map.get(mode_choice, ("balanced", 20))
 
 print()
 print(f"Condition:       {condition}")
@@ -702,7 +702,19 @@ while True:
                 if smoothed_ear >= opening_threshold:
                     if MIN_CLOSED_DURATION <= closure_duration_value <= MAX_BLINK_DURATION:
                         blink_count += 1
-                        blink_confirm_times.append(elapsed)
+                        # Record the ONSET time (when the eye started
+                        # closing), not the confirmation time (when it
+                        # finished reopening). A person's SPACE press
+                        # tracks close to when they feel themselves
+                        # blink -- i.e. onset -- not when the eye is
+                        # fully back open. Logging the confirmation
+                        # instant here introduced a systematic lag
+                        # equal to the full closure duration (found to
+                        # average ~330ms in testing), which pushed
+                        # otherwise-correct detections outside the
+                        # match tolerance against ground truth.
+                        blink_onset_elapsed = closure_start_time - recording_start
+                        blink_confirm_times.append(blink_onset_elapsed)
                         blink_event = 1
                     eye_state = OPEN
                     closure_start_time = None
@@ -807,7 +819,11 @@ metadata = {
         "recording, not a post-hoc typed total. Precision/recall are "
         "only as reliable as the operator's keypress timing -- treat "
         "small sample sizes (<20 events) as preliminary, not final "
-        "research numbers."
+        "research numbers. Detected blink timestamps used for matching "
+        "are the CLOSURE ONSET time (when the eye started closing), not "
+        "the confirmation time (when it finished reopening) -- v1/v2 "
+        "before this fix used confirmation time, which under-reported "
+        "matches by the full closure duration."
     ),
 }
 
